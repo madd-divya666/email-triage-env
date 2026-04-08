@@ -91,22 +91,32 @@ def llm_action(task_id: str, obs: dict) -> dict:
         f"Subject: {obs['subject']}\n\n"
         f"{obs['body']}"
     )
-    response = get_client().chat.completions.create(
-        model=MODEL_NAME,
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPTS[task_id]},
-            {"role": "user", "content": user_msg},
-        ],
-        temperature=0.0,
-        max_tokens=100,
-    )
-    raw = response.choices[0].message.content.strip()
-    # Strip markdown code fences if present
-    if raw.startswith("```"):
-        raw = raw.split("```")[1]
-        if raw.startswith("json"):
-            raw = raw[4:]
-    return json.loads(raw)
+    try:
+        response = get_client().chat.completions.create(
+            model=MODEL_NAME,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPTS[task_id]},
+                {"role": "user", "content": user_msg},
+            ],
+            temperature=0.0,
+            max_tokens=100,
+        )
+        raw = response.choices[0].message.content.strip()
+        # Strip markdown code fences if present
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+        return json.loads(raw)
+    except Exception as e:
+        print(f"[WARN] llm_action failed: {e}", flush=True)
+        # Return safe fallback action
+        if task_id == "task_easy":
+            return {"urgency": "not_urgent"}
+        elif task_id == "task_medium":
+            return {"category": "general_inquiry"}
+        else:
+            return {"category": "general_inquiry", "priority": 3, "routing_department": "general_support"}
 
 
 def run_task(task_id: str):
