@@ -26,7 +26,14 @@ MODEL_NAME = os.environ.get("MODEL_NAME", "gpt-4o-mini")
 HF_TOKEN = os.environ.get("HF_TOKEN", "")
 ENV_BASE_URL = os.environ.get("ENV_BASE_URL", "http://localhost:7860")
 
-client = OpenAI(api_key=HF_TOKEN, base_url=API_BASE_URL)
+client = None
+
+
+def get_client():
+    global client
+    if client is None:
+        client = OpenAI(api_key=HF_TOKEN, base_url=API_BASE_URL)
+    return client
 
 TASKS = ["task_easy", "task_medium", "task_hard"]
 
@@ -79,7 +86,7 @@ def llm_action(task_id: str, obs: dict) -> dict:
         f"Subject: {obs['subject']}\n\n"
         f"{obs['body']}"
     )
-    response = client.chat.completions.create(
+    response = get_client().chat.completions.create(
         model=MODEL_NAME,
         messages=[
             {"role": "system", "content": SYSTEM_PROMPTS[task_id]},
