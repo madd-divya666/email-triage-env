@@ -16,6 +16,7 @@ Usage:
 import os
 import json
 import requests
+import httpx
 from openai import OpenAI
 
 # ------------------------------------------------------------------
@@ -32,7 +33,11 @@ client = None
 def get_client():
     global client
     if client is None:
-        client = OpenAI(api_key=HF_TOKEN, base_url=API_BASE_URL)
+        client = OpenAI(
+            api_key=HF_TOKEN,
+            base_url=API_BASE_URL,
+            http_client=httpx.Client(),
+        )
     return client
 
 TASKS = ["task_easy", "task_medium", "task_hard"]
