@@ -136,7 +136,7 @@ def run_task(task_id: str):
         action = llm_action(task_id, obs)
         result = step_env(action)
 
-        reward_val = round(max(0.01, min(0.99, result["reward"]["value"])), 4)
+        reward_val = round(max(0.1, min(0.9, result["reward"]["value"])), 4)
         total_reward += reward_val
         step_num += 1
 
@@ -157,7 +157,7 @@ def run_task(task_id: str):
         obs = result["observation"]
 
     raw_mean = (total_reward / step_num) if step_num > 0 else 0.5
-    mean_score = round(max(0.01, min(0.99, raw_mean)), 4)
+    mean_score = round(max(0.1, min(0.9, raw_mean)), 4)
     log_end = {
         "type": "END",
         "task_id": task_id,
@@ -178,7 +178,7 @@ def main():
     summary = {
         "type": "SUMMARY",
         "scores": all_scores,
-        "overall_mean": round(max(0.01, min(0.99, sum(all_scores.values()) / len(all_scores))), 4),
+        "overall_mean": round(max(0.1, min(0.9, sum(all_scores.values()) / len(all_scores))), 4),
     }
     print(f"[SUMMARY] {json.dumps(summary)}", flush=True)
 

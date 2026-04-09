@@ -116,8 +116,8 @@ class EmailTriageEnv:
         gt = email["easy_label"]
         pred = action.urgency
         if pred is None:
-            return EmailReward(value=0.01, breakdown={"urgency": 0.01}, feedback="No urgency provided.")
-        correct = 0.99 if pred == gt else 0.01
+            return EmailReward(value=0.1, breakdown={"urgency": 0.1}, feedback="No urgency provided.")
+        correct = 0.9 if pred == gt else 0.1
         feedback = "Correct!" if pred == gt else f"Wrong. Expected '{gt}', got '{pred}'."
         return EmailReward(value=correct, breakdown={"urgency": correct}, feedback=feedback)
 
@@ -125,8 +125,8 @@ class EmailTriageEnv:
         gt = email["medium_label"]
         pred = action.category
         if pred is None:
-            return EmailReward(value=0.01, breakdown={"category": 0.01}, feedback="No category provided.")
-        correct = 0.99 if pred == gt else 0.01
+            return EmailReward(value=0.1, breakdown={"category": 0.1}, feedback="No category provided.")
+        correct = 0.9 if pred == gt else 0.1
         feedback = "Correct!" if pred == gt else f"Wrong. Expected '{gt}', got '{pred}'."
         return EmailReward(value=correct, breakdown={"category": correct}, feedback=feedback)
 
@@ -136,20 +136,20 @@ class EmailTriageEnv:
         feedback_parts = []
 
         # Category (weight 0.40)
-        cat_score = 0.0
+        cat_score = 0.1
         if action.category is not None:
-            cat_score = 1.0 if action.category == gt["category"] else 0.0
-            cat_fb = "correct" if cat_score else f"wrong (expected {gt['category']})"
+            cat_score = 0.9 if action.category == gt["category"] else 0.1
+            cat_fb = "correct" if action.category == gt["category"] else f"wrong (expected {gt['category']})"
             feedback_parts.append(f"Category: {cat_fb}")
         else:
             feedback_parts.append("Category: missing")
         breakdown["category"] = cat_score
 
         # Priority (weight 0.30) — partial credit for close answers
-        pri_score = 0.0
+        pri_score = 0.1
         if action.priority is not None:
             diff = abs(action.priority - gt["priority"])
-            pri_score = max(0.0, 1.0 - diff * 0.25)
+            pri_score = round(max(0.1, 0.9 - diff * 0.2), 4)
             pri_fb = "correct" if diff == 0 else f"off by {diff} (expected {gt['priority']})"
             feedback_parts.append(f"Priority: {pri_fb}")
         else:
@@ -157,17 +157,17 @@ class EmailTriageEnv:
         breakdown["priority"] = pri_score
 
         # Routing (weight 0.30)
-        route_score = 0.0
+        route_score = 0.1
         if action.routing_department is not None:
-            route_score = 1.0 if action.routing_department == gt["routing_department"] else 0.0
-            route_fb = "correct" if route_score else f"wrong (expected {gt['routing_department']})"
+            route_score = 0.9 if action.routing_department == gt["routing_department"] else 0.1
+            route_fb = "correct" if route_score == 0.9 else f"wrong (expected {gt['routing_department']})"
             feedback_parts.append(f"Routing: {route_fb}")
         else:
             feedback_parts.append("Routing: missing")
         breakdown["routing"] = route_score
 
         total = round(0.40 * cat_score + 0.30 * pri_score + 0.30 * route_score, 4)
-        total = max(0.01, min(0.99, total))
+        total = max(0.1, min(0.9, total))
         return EmailReward(
             value=total,
             breakdown=breakdown,
