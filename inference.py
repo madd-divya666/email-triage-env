@@ -136,7 +136,7 @@ def run_task(task_id: str):
         action = llm_action(task_id, obs)
         result = step_env(action)
 
-        reward_val = result["reward"]["value"]
+        reward_val = round(max(0.01, min(0.99, result["reward"]["value"])), 4)
         total_reward += reward_val
         step_num += 1
 
