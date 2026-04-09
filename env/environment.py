@@ -116,18 +116,18 @@ class EmailTriageEnv:
         gt = email["easy_label"]
         pred = action.urgency
         if pred is None:
-            return EmailReward(value=0.0, breakdown={"urgency": 0.0}, feedback="No urgency provided.")
-        correct = 1.0 if pred == gt else 0.0
-        feedback = "Correct!" if correct else f"Wrong. Expected '{gt}', got '{pred}'."
+            return EmailReward(value=0.01, breakdown={"urgency": 0.01}, feedback="No urgency provided.")
+        correct = 0.99 if pred == gt else 0.01
+        feedback = "Correct!" if pred == gt else f"Wrong. Expected '{gt}', got '{pred}'."
         return EmailReward(value=correct, breakdown={"urgency": correct}, feedback=feedback)
 
     def _grade_medium(self, action: EmailAction, email: dict) -> EmailReward:
         gt = email["medium_label"]
         pred = action.category
         if pred is None:
-            return EmailReward(value=0.0, breakdown={"category": 0.0}, feedback="No category provided.")
-        correct = 1.0 if pred == gt else 0.0
-        feedback = "Correct!" if correct else f"Wrong. Expected '{gt}', got '{pred}'."
+            return EmailReward(value=0.01, breakdown={"category": 0.01}, feedback="No category provided.")
+        correct = 0.99 if pred == gt else 0.01
+        feedback = "Correct!" if pred == gt else f"Wrong. Expected '{gt}', got '{pred}'."
         return EmailReward(value=correct, breakdown={"category": correct}, feedback=feedback)
 
     def _grade_hard(self, action: EmailAction, email: dict) -> EmailReward:
@@ -167,6 +167,7 @@ class EmailTriageEnv:
         breakdown["routing"] = route_score
 
         total = round(0.40 * cat_score + 0.30 * pri_score + 0.30 * route_score, 4)
+        total = max(0.01, min(0.99, total))
         return EmailReward(
             value=total,
             breakdown=breakdown,
