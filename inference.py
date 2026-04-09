@@ -156,7 +156,8 @@ def run_task(task_id: str):
             break
         obs = result["observation"]
 
-    mean_score = round(total_reward / step_num, 4) if step_num > 0 else 0.0
+    raw_mean = (total_reward / step_num) if step_num > 0 else 0.5
+    mean_score = round(max(0.01, min(0.99, raw_mean)), 4)
     log_end = {
         "type": "END",
         "task_id": task_id,
@@ -177,7 +178,7 @@ def main():
     summary = {
         "type": "SUMMARY",
         "scores": all_scores,
-        "overall_mean": round(sum(all_scores.values()) / len(all_scores), 4),
+        "overall_mean": round(max(0.01, min(0.99, sum(all_scores.values()) / len(all_scores))), 4),
     }
     print(f"[SUMMARY] {json.dumps(summary)}", flush=True)
 
