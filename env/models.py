@@ -27,6 +27,6 @@ class EmailAction(BaseModel):
 
 
 class EmailReward(BaseModel):
-    value: float = Field(..., ge=0.0, le=1.0)
+    value: float = Field(..., gt=0.0, lt=1.0)
     breakdown: Dict[str, float] = {}
     feedback: str = ""
